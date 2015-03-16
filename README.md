@@ -1,7 +1,7 @@
 # OpsVis Clients
-## The first step in DevOps transformation is knowing where change is needed
+### The first step in DevOps transformation is knowing where change is needed
 
-### Overview
+## Overview
 
 This repository includes the cloudformation json and opsworks cookbooks to stand up a complete ELK stack in AWS.
 
@@ -12,18 +12,9 @@ It also builds everything with private-only ip addresses and restricts all exter
 1. Logs and metrics flow in through HA RabbitMQ with SSL terminated at the ELB
 1. All dashboards and elasticsearch requests are protected by doorman and hosted together on a “dashboard” host
 
-### Components
+## Components
 - Sensu
 - Logstash
-
-### Setup
-1. Upload an SSL Certificate to AWS for the RabbitMQ ELB - and note the generated ARN [Instructions](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/ssl-server-cert.html#upload-cert)
-2. Create a new cloud formation stack on the [Cloud Formation Dashboard](https://console.aws.amazon.com/cloudformation/home) [image](screenshots/create_stack.png)
-3. Choose "Upload a template to Amazon S3" on upload cloudformation.json
-4. See Cloudformation Paramaters section on specifics for paramaters [image](screenshots/cloudformation_parameters.png)
-5. *During options I recommend disabling rollback on failture so you can see logs on opsworks boxes when recipes fail* [image](screenshots/rollback_on_failure.png)
-
-
 
 ### Access Into Operational Visibility Stack
 RabbitMQ has a public facing ELB in front of it with SSL termination.
@@ -66,16 +57,3 @@ This would make it easier to update sensu without needing to worry about making 
 
   When adding a check as [type metric](http://sensuapp.org/docs/0.11/adding_a_metric) set the handlers to "graphite".
   *This will forward any metrics onto graphite for us automatically*
-
-***
-
-### Custom JSON
-[This Custom Json](custom_json.example.json) is the Custom Json block that is set as the OpsWorks custom json. It drives a lot of the custom configuration
-that chef uses to customize the boxes. Its currently embedded in the Cloud Formation script so that we can inject paramaters into the custom json.
-
-If changes need to be made to the custom json you can do it from the OpsWorks stack's stack settings page. If you make changes make sure that you
-don't update the Cloud Formation stack as it will overwrite the custom OpsWork's settings you made.
-
-*Todo: At some point it would be nice to allow a user to inject their own custom json into the cloud formation processes without having to manually make changes
-to the monolithic cloudromation.json file*
-
