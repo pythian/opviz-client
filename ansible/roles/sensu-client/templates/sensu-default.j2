@@ -1,0 +1,6 @@
+EMBEDDED_RUBY=true
+
+# Adds the sensu-community plugins into the path
+export PATH={{ opviz_plugin_dir }}:$PATH
+# Adds the sensu-community handlers into the path
+#export PATH=`find {{ opviz_plugin_dir }} -type d | sort | tr '\n' ':'`$PATH

@@ -1,0 +1,15 @@
+---
+# TODO: Test on Ubuntu
+- name: Debian - Add Sensu apt-key
+  apt_key: id=7580C77F url=http://repos.sensuapp.org/apt/pubkey.gpg state=present
+
+- name: Debian - Add Sensu repo
+  apt_repository: repo='deb http://repos.sensuapp.org/apt sensu main' state=present
+
+- name: Debian - Add Sensu client package
+  apt: pkg=sensu state=present
+
+- name: Debian - Add dependencies
+  apt: pkg="{{ item }}" state=present
+  with_items:
+    - git
