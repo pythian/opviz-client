@@ -80,4 +80,4 @@ This section assumes that you want to install the client(s) on a remote server f
 
 ## Using ansible
 
-Refer to [ansible README](ansible/roles/README.md)
+Refer to [ansible README](/ansible/roles/README.md)
