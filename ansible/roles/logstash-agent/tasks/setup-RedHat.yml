@@ -1,0 +1,8 @@
+---
+- name: RedHat - Add Elasticsearch GPG key.
+  rpm_key:
+    key: http://packages.elasticsearch.org/GPG-KEY-elasticsearch
+    state: present
+
+- name: RedHat - Add Logstash
+  yum: name=logstash state=present

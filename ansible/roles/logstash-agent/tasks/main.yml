@@ -1,0 +1,22 @@
+---
+- name: Setup Logstash client on Debian
+  include: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Setup Logstash client on RedHat
+  include: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- name: Add logstash to correct groups
+  user: name=logstash groups="{{ logstash['groups'] }}"
+
+# TODO: determine if we need /var/lib/monit
+- name: "Ensure /etc/logstash/conf.d directory"
+  file: state=directory dest=/etc/logstash/conf.d owner="{{ logstash_user }}" group="{{ logstash_user }}" mode=0755
+
+- name: "Add logstash agent config"
+  template: src=logstash-agent.j2 dest=/etc/logstash/conf.d/agent.conf
+  notify: restart logstash-agent
+
+- name: Ensure logstash service are enabled
+  service: name=logstash state=started enabled=yes

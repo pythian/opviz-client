@@ -20,11 +20,11 @@ opviz_repo: https://github.com/pythian/opviz-client.git
 opviz_dir: /opt/opviz
 opviz_plugin_dir: "{{ opviz_dir }}/chef-cookbooks/opviz-client/files/default/sensu_plugins" # TODO: relocate these
 
+opviz_name: "{{ stack_prefix }}-{{ inventory_hostname | replace ('.', '-') }}"
+
 sensu_sudo_plugins:
   - /usr/bin/jstat
   - /usr/bin/jps
-
-sensu_plugin_gems: []
 
 sensu_process_log_enabled: false
 sensu_process_log: []

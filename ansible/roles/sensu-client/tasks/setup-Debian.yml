@@ -13,3 +13,5 @@
   apt: pkg="{{ item }}" state=present
   with_items:
     - git
+    - gcc
+    - make

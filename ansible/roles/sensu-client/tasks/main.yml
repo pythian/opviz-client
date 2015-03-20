@@ -45,12 +45,16 @@
     mode=0644
   notify: restart sensu-client
 
-# TODO: Specify version
-- name: Fetch opviz repository
-  git: >
-    repo={{ opviz_repo }}
-    dest={{ opviz_dir }}
-    update=yes
+- name: Install general gem dependencies
+  gem: >
+    name={{ item }}
+    state=present user_install=no executable=/opt/sensu/embedded/bin/gem
+  with_items:
+    - sensu-plugin
+    - aws-sdk
+
+- name: Installs dependencies for plugins based on group subscriptions
+  include: subscription_dependencies.yml
 
 # TODO: Don't do this if on Windows
 - name: give sudo permission for some of the plugins
@@ -61,39 +65,16 @@
     group=root
     mode=0440
 
-# - name: installs gem dependencies for some of the plugins
-#   gem: >
-#     name={{ item.name }} version={{ item.version }}
-#     state=present user_install=no executable=/opt/sensu/embedded/bin/gem
-#   with_items: sensu_plugin_gems
+# TODO: Specify version
+- name: Fetch opviz repository
+  git: >
+    repo={{ opviz_repo }}
+    dest={{ opviz_dir }}
+    update=yes
 
 # TODO: Checks are installed via server
 - name: sensu checks directory
   file: dest=/etc/sensu/conf.d/checks state=directory owner=root mode=0755
-
-# TODO: Set up cert information if available
-- name: sensu cert directory
-  file: dest=/etc/sensu/ssl state=directory owner=root group=sensu mode=0750
-
-- name: install sensu cert
-  when: sensu_client_cert is defined
-  copy: >
-    content={{ sensu_client_cert }}
-    dest=/etc/sensu/ssl/cert.pem
-    owner=root
-    group=sensu
-    mode=0440
-  notify: restart sensu-client
-
-- name: install sensu key
-  when: sensu_client_key is defined
-  copy: >
-    content={{ sensu_client_key }}
-    dest=/etc/sensu/ssl/key.pem
-    owner=root
-    group=sensu
-    mode=0440
-  notify: restart sensu-client
 
 - name: Clear out sensu server config
   copy: >

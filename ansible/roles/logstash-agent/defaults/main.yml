@@ -1,0 +1,25 @@
+---
+
+using_upstart: yes
+
+logstash_version: 1.4
+
+logstash_user: logstash
+
+# Default ansible behavior is to replace hashes, not merge. http://docs.ansible.com/intro_configuration.html#hash-behaviour
+# So we will assume defaults are overwritten by group vars or playbook vars
+logstash:
+  rabbitmq:
+    host: localhost
+    password: ""
+  file_inputs: {}
+  filters: []
+
+rabbitmq_defaults:
+  ssl: "true"
+  verify_ssl: "false"
+  port: 5671
+  user: logstash_external
+  exchange: logstash
+  exchange_type: direct
+
