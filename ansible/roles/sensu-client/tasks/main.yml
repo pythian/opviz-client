@@ -17,7 +17,7 @@
 
 - name: Remove client init.d scripts if using upstart
   file: state=absent dest=/etc/init.d/sensu-client
-  when: "{{using_upstart}} == True"
+  when: "{{ using_upstart }} == True"
 
 - name: Install upstart init scripts if using upstart
   template: >
@@ -27,13 +27,13 @@
     group=root
     mode=0644
   with_items:
-  - api
+  # - api
   - client
-  - dashboard
-  - server
-  when: "{{using_upstart}} == True"
+  # - dashboard
+  # - server
+  when: "{{ using_upstart }} == True"
 
-- name: Ensure services are enabled or not
+- name: Ensure sensu client service is enabled
   service: name=sensu-client enabled=yes
 
 - name: Setup sensu to use the embedded ruby

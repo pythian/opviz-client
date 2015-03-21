@@ -1,7 +1,5 @@
 ---
 
-using_upstart: no
-
 # Default ansible behavior is to replace hashes, not merge. http://docs.ansible.com/intro_configuration.html#hash-behaviour
 # So we will assume defaults are overwritten by group vars or playbook vars
 sensu:
@@ -20,7 +18,7 @@ opviz_repo: https://github.com/pythian/opviz-client.git
 opviz_dir: /opt/opviz
 opviz_plugin_dir: "{{ opviz_dir }}/chef-cookbooks/opviz-client/files/default/sensu_plugins" # TODO: relocate these
 
-opviz_name: "{{ stack_prefix }}-{{ inventory_hostname | replace ('.', '-') }}"
+opviz_name: "{{ inventory_hostname | replace ('.', '-') }}.{{ stack_prefix }}"
 
 sensu_sudo_plugins:
   - /usr/bin/jstat
