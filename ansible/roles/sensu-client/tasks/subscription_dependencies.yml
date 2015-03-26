@@ -1,0 +1,4 @@
+---
+- name: Install mysql dependencies when subscribed to mysql group
+  include: mysql.yml
+  when: '"mysql" in sensu.subscriptions'

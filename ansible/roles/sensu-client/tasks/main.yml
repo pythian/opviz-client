@@ -1,0 +1,99 @@
+---
+# Based on zimbam.sensu-client from ansible galaxy
+
+- name: Setup Sensu client on Debian
+  include: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Setup Sensu client on RedHat
+  include: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- name: Remove non-client init.d scripts
+  file: state=absent dest=/etc/init.d/sensu-{{ item }}
+  with_items:
+  - api
+  - server
+
+- name: Remove client init.d scripts if using upstart
+  file: state=absent dest=/etc/init.d/sensu-client
+  when: "{{ using_upstart }} == True"
+
+- name: Install upstart init scripts if using upstart
+  template: >
+    src=sensu-upstart.conf.j2
+    dest=/etc/init/sensu-{{ item }}.conf
+    owner=root
+    group=root
+    mode=0644
+  with_items:
+  # - api
+  - client
+  # - dashboard
+  # - server
+  when: "{{ using_upstart }} == True"
+
+- name: Ensure sensu client service is enabled
+  service: name=sensu-client enabled=yes
+
+- name: Setup sensu to use the embedded ruby
+  template: >
+    src=sensu-default.j2
+    dest=/etc/default/sensu
+    owner=root
+    group=root
+    mode=0644
+  notify: restart sensu-client
+
+- name: Install general gem dependencies
+  gem: >
+    name={{ item }}
+    state=present user_install=no executable=/opt/sensu/embedded/bin/gem
+  with_items:
+    - sensu-plugin
+    - aws-sdk
+
+- name: Installs dependencies for plugins based on group subscriptions
+  include: subscription_dependencies.yml
+
+# TODO: Don't do this if on Windows
+- name: give sudo permission for some of the plugins
+  template: >
+    src=sensu-sudoers.j2
+    dest=/etc/sudoers.d/sensu
+    owner=root
+    group=root
+    mode=0440
+
+# TODO: Specify version
+- name: Fetch opviz repository
+  git: >
+    repo={{ opviz_repo }}
+    dest={{ opviz_dir }}
+    update=yes
+
+# TODO: Checks are installed via server
+- name: sensu checks directory
+  file: dest=/etc/sensu/conf.d/checks state=directory owner=root mode=0755
+
+- name: Clear out sensu server config
+  copy: >
+    content="{}"
+    dest=/etc/sensu/config.json
+    owner=root
+    group=root
+    mode=0644
+  notify: restart sensu-client
+
+- name: Sensu client config
+  template: >
+    src={{ item }}.json.j2
+    dest=/etc/sensu/conf.d/{{ item }}.json
+    owner=root
+    group=sensu
+    mode=0640
+    validate="python -mjson.tool %s"
+  notify: restart sensu-client
+  with_items:
+  - rabbitmq
+  - client

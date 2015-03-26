@@ -1,0 +1,21 @@
+---
+# TODO: Install sensu client
+- hosts: "{{ targets }}"
+  sudo: yes
+  vars:
+    sensu:
+      rabbitmq:
+        host: XXXXX
+        port: 5671
+        user: sensu
+        ssl: true
+        password: "XXXX" # TODO: encrypt with ansible vault
+      subscriptions: ["all"]
+      mysql:
+        user: sensu
+        password: sensu_check
+  roles:
+    - { role: sensu-client }
+
+# TODO: Install logstash client
+

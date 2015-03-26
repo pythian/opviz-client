@@ -1,0 +1,12 @@
+---
+- name: Install mysql dependencies when subscribed to mysql group
+  gem: >
+    name={{ item }}
+    state=present user_install=no executable=/opt/sensu/embedded/bin/gem
+  with_items:
+    - mysql2
+    - inifile
+
+# TODO: If using 5.6 we can utilize encrypted files, but plugins will have to be modified
+- name: Configure sensu initfile for MySQL connectivity
+  template: src=my.cnf_sensu.j2 dest=/opt/sensu/.my.cnf owner=sensu group=sensu mode=0400

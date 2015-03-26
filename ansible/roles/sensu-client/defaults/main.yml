@@ -1,0 +1,28 @@
+---
+
+# Default ansible behavior is to replace hashes, not merge. http://docs.ansible.com/intro_configuration.html#hash-behaviour
+# So we will assume defaults are overwritten by group vars or playbook vars
+sensu:
+  rabbitmq:
+    host: localhost
+    port: 5671
+    ssl: true
+    user: sensu
+    password: ""
+  subscriptions: ["all"]
+  mysql:
+    user: sensu
+    password: sensu_check
+
+opviz_repo: https://github.com/pythian/opviz-client.git
+opviz_dir: /opt/opviz
+opviz_plugin_dir: "{{ opviz_dir }}/chef-cookbooks/opviz-client/files/default/sensu_plugins" # TODO: relocate these
+
+opviz_name: "{{ inventory_hostname | replace ('.', '-') }}.{{ stack_prefix }}"
+
+sensu_sudo_plugins:
+  - /usr/bin/jstat
+  - /usr/bin/jps
+
+sensu_process_log_enabled: false
+sensu_process_log: []

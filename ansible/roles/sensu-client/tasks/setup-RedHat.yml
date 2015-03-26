@@ -1,0 +1,13 @@
+---
+- name: RedHat - Add Sensu repo
+  template: src=yum_repo.j2 dest=/etc/yum.repos.d/Sensu.repo
+
+- name: RedHat - Add Sensu
+  yum: name=sensu state=present
+
+- name: RedHat - Add dependencies
+  yum: name="{{ item }}" state=present
+  with_items:
+    - git
+    - gcc
+    - make

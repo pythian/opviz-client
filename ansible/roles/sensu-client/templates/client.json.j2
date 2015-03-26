@@ -1,0 +1,7 @@
+{
+  "client": {
+    "name": "{{ opviz_name|default(ansible_fqdn) }}",
+    "address": "{{ ansible_eth0["ipv4"]["address"] }}",
+    "subscriptions": {{ sensu['subscriptions'] | to_nice_json }}
+  }
+}

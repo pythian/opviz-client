@@ -1,0 +1,29 @@
+{% if logstash['file_inputs']|length>0 %}
+input {
+{% for input in logstash['file_inputs'] %}
+    file {
+        type => "{{ input.type }}"
+        path => "{{ input.path }}"
+    }
+{% endfor %}
+}
+{% endif %}
+
+filter {
+    mutate {
+        replace => ["host", "{{ inventory_hostname }}"]
+    }
+}
+
+output {
+  rabbitmq {
+    host => "{{ logstash['rabbitmq']['host'] }}"
+    password => "{{ logstash['rabbitmq']['password'] }}"
+    exchange => "{{ rabbitmq_defaults['exchange'] }}"
+    exchange_type => "{{ rabbitmq_defaults['exchange_type'] }}"
+    port => "{{ rabbitmq_defaults['port'] }}"
+    ssl => "{{ rabbitmq_defaults['ssl'] }}"
+    user => "{{ rabbitmq_defaults['user'] }}"
+    verify_ssl => "{{ rabbitmq_defaults['verify_ssl'] }}"
+  }
+}
