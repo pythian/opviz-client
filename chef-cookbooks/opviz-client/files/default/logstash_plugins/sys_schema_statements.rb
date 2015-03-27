@@ -42,7 +42,7 @@ if options[:ini]
   section = ini['client']
   db_user = section['user']
   db_pass = section['password']
-  # socket = section['socket']
+  socket = section['socket']
 else
   db_user = "root"
   db_pass = ""
