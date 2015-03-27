@@ -46,10 +46,10 @@ if options[:ini]
 else
   db_user = "root"
   db_pass = ""
-  # socket = config[:socket]
+  socket = ""
 end
 
-client = Mysql2::Client.new(:host => "localhost", :username => db_user, :password => db_pass)
+client = Mysql2::Client.new(:host => "localhost", :username => db_user, :password => db_pass, :socket => socket)
 results = client.query("SELECT * FROM sys.x$statement_analysis;")
 # client.query("truncate table performance_schema.events_statements_history_long")
 results.each do |row|
