@@ -230,7 +230,7 @@ class Mysql2Graphite < Sensu::Plugin::Metric::CLI::Graphite
         section = ini['client']
         db_user = section['user']
         db_pass = section['password']
-        socket = section['password']
+        socket = section['socket']
       else
         db_user = config[:username]
         db_pass = config[:password]
