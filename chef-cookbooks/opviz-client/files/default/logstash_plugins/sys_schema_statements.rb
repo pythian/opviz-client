@@ -55,3 +55,4 @@ client.query("TRUNCATE TABLE performance_schema.events_statements_history_long")
 results.each do |row|
    puts row.to_json
 end
+client.close();
