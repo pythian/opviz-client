@@ -128,6 +128,7 @@ class Mysql2Graphite < Sensu::Plugin::Metric::CLI::Graphite
         'Aborted_clients' =>        'abortedClients',
         'Aborted_connects' =>       'abortedConnects',
         'Threads_connected' =>      'threadsConnected',
+        'Threads_running' =>        'threadsRunning',
         'Open_files' =>             'openFiles',
         'Open_tables' =>            'openTables',
         'Opened_tables' =>          'openedTables',
@@ -219,7 +220,8 @@ class Mysql2Graphite < Sensu::Plugin::Metric::CLI::Graphite
         'Innodb_rows_inserted' =>             'rowsInserted'
       },
       'configuration' => {
-        'Max_prepared_stmt_count' =>          'MaxPreparedStmtCount'
+        'Max_prepared_stmt_count' =>          'MaxPreparedStmtCount',
+        'Max_connections' =>                  'MaxAllowedConnections'
       }
     }
 
