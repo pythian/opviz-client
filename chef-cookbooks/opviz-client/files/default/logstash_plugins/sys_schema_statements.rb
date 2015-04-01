@@ -49,10 +49,10 @@ else
   socket = ""
 end
 
-client = Mysql2::Client.new(:host => "localhost", :username => db_user, :password => db_pass, :socket => socket)
+client = Mysql2::Client.new(:username => db_user, :password => db_pass, :socket => socket)
 results = client.query("SELECT *,CONCAT(DATE_FORMAT(DATE_SUB(NOW(),INTERVAL (SELECT VARIABLE_VALUE FROM information_schema.global_status WHERE variable_name='UPTIME')-TIMER_START*10e-13 second),'%Y-%m-%d %T')) start_time, timer_wait/10E-8 wait_ms FROM performance_schema.events_statements_history_long;")
 client.query("TRUNCATE TABLE performance_schema.events_statements_history_long")
 results.each do |row|
    puts row.to_json
 end
-client.close();
+client.close;
