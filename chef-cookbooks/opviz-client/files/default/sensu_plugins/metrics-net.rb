@@ -67,12 +67,65 @@ require 'rubygems' if RUBY_VERSION < '1.9.0'
 require 'sensu-plugin/metric/cli'
 require 'socket'
 
+TCP_STATES = {
+  '00' => 'UNKNOWN',  # Bad state ... Impossible to achieve ...
+  'FF' => 'UNKNOWN',  # Bad state ... Impossible to achieve ...
+  '01' => 'ESTABLISHED',
+  '02' => 'SYN_SENT',
+  '03' => 'SYN_RECV',
+  '04' => 'FIN_WAIT1',
+  '05' => 'FIN_WAIT2',
+  '06' => 'TIME_WAIT',
+  '07' => 'CLOSE',
+  '08' => 'CLOSE_WAIT',
+  '09' => 'LAST_ACK',
+  '0A' => 'LISTEN',
+  '0B' => 'CLOSING'
+}
+
+# class NetstatTCPMetrics < Sensu::Plugin::Metric::CLI::Graphite
+#   option :scheme,
+#          description: 'Metric naming scheme, text to prepend to metric',
+#          short: '-s SCHEME',
+#          long: '--scheme SCHEME',
+#          default: "#{Socket.gethostname}.tcp"
+
+#   option :port,
+#          description: 'Port you wish to get metrics for',
+#          short: '-p PORT',
+#          long: '--port PORT',
+#          proc: proc(&:to_i)
+
+
+# end
+
 class LinuxPacketMetrics < Sensu::Plugin::Metric::CLI::Graphite
   option :scheme,
          description: 'Metric naming scheme, text to prepend to metric',
          short: '-s SCHEME',
          long: '--scheme SCHEME',
          default: "#{Socket.gethostname}.net"
+
+  def netstat(protocol = 'tcp')
+    state_counts = Hash.new(0)
+    TCP_STATES.each_pair { |_hex, name| state_counts[name] = 0 }
+
+    # #YELLOW
+    File.open('/proc/net/' + protocol).each do |line| # rubocop:disable Style/Next
+      line.strip!
+      if m = line.match(/^\s*\d+:\s+(.{8}):(.{4})\s+(.{8}):(.{4})\s+(.{2})/) # rubocop:disable AssignmentInCondition
+        connection_state = m[5]
+        connection_port = m[2].to_i(16)
+        connection_state = TCP_STATES[connection_state]
+        if config[:port] && config[:port] == connection_port
+          state_counts[connection_state] += 1
+        elsif !config[:port]
+          state_counts[connection_state] += 1
+        end
+      end
+    end
+    state_counts
+  end
 
   def run
     timestamp = Time.now.to_i
@@ -100,6 +153,14 @@ class LinuxPacketMetrics < Sensu::Plugin::Metric::CLI::Graphite
       output "#{config[:scheme]}.#{iface}.tx_errors", tx_errors, timestamp
       output "#{config[:scheme]}.#{iface}.rx_errors", rx_errors, timestamp
       output "#{config[:scheme]}.#{iface}.if_speed", if_speed, timestamp
+    end
+
+    # Collect statistics for connection types
+    timestamp = Time.now.to_i
+    netstat('tcp').each do |state, count|
+      graphite_name = config[:port] ? "#{config[:scheme]}.#{config[:port]}.#{state}" :
+        "#{config[:scheme]}.#{state}"
+      output "#{graphite_name}", count, timestamp
     end
     ok
   end
