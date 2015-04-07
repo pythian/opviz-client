@@ -1,0 +1,5 @@
+# Used from shuge examples: https://github.com/shuge/man/blob/master/srv/log/collect-mysql-log-by-logstash.md
+MYSQL_ERROR_TIMESTAMP %{NUMBER:date} %{TIME}
+MYSQL_ERROR_LOG_CONTENT_P1 \[%{WORD:mysql_error_log_level}\] %{GREEDYDATA:mysql_error_log_content}
+MYSQL_ERROR_LOG_CONTENT_P2 %{GREEDYDATA:mysql_error_log_content}
+MYSQL_ERROR_LOG %{MYSQL_ERROR_TIMESTAMP} (%{MYSQL_ERROR_LOG_CONTENT_P1}|%{MYSQL_ERROR_LOG_CONTENT_P2})
