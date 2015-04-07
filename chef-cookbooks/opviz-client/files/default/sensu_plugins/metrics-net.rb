@@ -117,11 +117,11 @@ class LinuxPacketMetrics < Sensu::Plugin::Metric::CLI::Graphite
         connection_state = m[5]
         connection_port = m[2].to_i(16)
         connection_state = TCP_STATES[connection_state]
-        if config[:port] && config[:port] == connection_port
-          state_counts[connection_state] += 1
-        elsif !config[:port]
-          state_counts[connection_state] += 1
-        end
+        # if config[:port] && config[:port] == connection_port
+          state_counts[connection_port][connection_state] += 1
+        # elsif !config[:port]
+        #   state_counts[connection_state] += 1
+        # end
       end
     end
     state_counts
@@ -157,10 +157,13 @@ class LinuxPacketMetrics < Sensu::Plugin::Metric::CLI::Graphite
 
     # Collect statistics for connection types
     timestamp = Time.now.to_i
-    netstat('tcp').each do |state, count|
-      graphite_name = config[:port] ? "#{config[:scheme]}.#{config[:port]}.#{state}" :
-        "#{config[:scheme]}.#{state}"
-      output "#{graphite_name}", count, timestamp
+    netstat('tcp').each do |port, state_arr|
+      state_arr.each do |state, count|
+        # graphite_name = config[:port] ? "#{config[:scheme]}.states.#{config[:port]}.#{state}" :
+        #   "#{config[:scheme]}.states.#{state}"
+        graphite_name = "#{config[:scheme]}.states.#{port}.#{state}"
+        output "#{graphite_name}", count, timestamp
+      end
     end
     ok
   end
