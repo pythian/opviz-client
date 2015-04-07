@@ -108,6 +108,7 @@ class LinuxPacketMetrics < Sensu::Plugin::Metric::CLI::Graphite
 
   def netstat(protocol = 'tcp')
     state_counts = Hash.new(0)
+    port_states = Hash.new(0)
     TCP_STATES.each_pair { |_hex, name| state_counts[name] = 0 }
 
     # #YELLOW
@@ -115,16 +116,14 @@ class LinuxPacketMetrics < Sensu::Plugin::Metric::CLI::Graphite
       line.strip!
       if m = line.match(/^\s*\d+:\s+(.{8}):(.{4})\s+(.{8}):(.{4})\s+(.{2})/) # rubocop:disable AssignmentInCondition
         connection_state = m[5]
-        connection_port = m[2].to_i(16)
+        connection_port = m[2].to_i(16).to_s
         connection_state = TCP_STATES[connection_state]
-        # if config[:port] && config[:port] == connection_port
-          state_counts[connection_port][connection_state] += 1
-        # elsif !config[:port]
-        #   state_counts[connection_state] += 1
-        # end
+
+        port_states.store(connection_port, state_counts.dup) unless port_states.has_key?(connection_port)
+        port_states[connection_port][connection_state] += 1
       end
     end
-    state_counts
+    port_states
   end
 
   def run
