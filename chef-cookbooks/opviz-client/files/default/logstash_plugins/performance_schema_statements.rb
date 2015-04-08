@@ -1,7 +1,6 @@
 #!/usr/bin/ruby
 # Author: Derek Downey
-# sys_schema_statements.rb - Grab statements from performance schema to be grok'd/filtered by logstash
-# Current version relies on sys_schema from Mark Leith
+# performance_schema_statements.rb - Grab statements from performance schema to be grok'd/filtered by logstash
 
 require 'rubygems' if RUBY_VERSION < '1.9.0'
 require 'optparse'
@@ -24,7 +23,7 @@ require 'json'
 options = {:ini => nil}
 
 parser = OptionParser.new do|opts|
-  opts.banner = "Usage: sys_schema_statements.rb [options]"
+  opts.banner = "Usage: performance_schema_statements.rb [options]"
   opts.on('-i', '--ini inifile', 'inifile') do |inifile|
     options[:ini] = inifile;
   end
@@ -50,8 +49,17 @@ else
 end
 
 client = Mysql2::Client.new(:username => db_user, :password => db_pass, :socket => socket)
-results = client.query("SELECT *,CONCAT(DATE_FORMAT(DATE_SUB(NOW(),INTERVAL (SELECT VARIABLE_VALUE FROM information_schema.global_status WHERE variable_name='UPTIME')-TIMER_START*10e-13 second),'%Y-%m-%d %T')) start_time, timer_wait/10E-8 wait_ms FROM performance_schema.events_statements_history_long;")
-client.query("TRUNCATE TABLE performance_schema.events_statements_history_long")
+results = client.query("SELECT
+  history.thread_id, history.EVENT_NAME, history.DIGEST, history.DIGEST_TEXT,
+  CONCAT(DATE_FORMAT(DATE_SUB(NOW(),INTERVAL (SELECT VARIABLE_VALUE FROM information_schema.global_status WHERE variable_name='UPTIME')-TIMER_START*10e-13 second),'%Y-%m-%d %T')) START_TIME, TIMER_WAIT/10E-8 WAIT_MS,
+  CURRENT_SCHEMA, OBJECT_SCHEMA, OBJECT_TYPE, OBJECT_NAME, MYSQL_ERRNO, RETURNED_SQLSTATE,
+  ERRORS, WARNINGS, ROWS_AFFECTED, ROWS_SENT, ROWS_EXAMINED, CREATED_TMP_DISK_TABLES,
+  CREATED_TMP_TABLES, SELECT_FULL_JOIN, SELECT_FULL_RANGE_JOIN, SELECT_RANGE, SELECT_RANGE_CHECK,
+  SELECT_SCAN, SORT_MERGE_PASSES, SORT_RANGE, SORT_ROWS, SORT_SCAN, NO_INDEX_USED, NO_GOOD_INDEX_USED
+FROM events_statements_history_long AS history
+INNER JOIN events_statements_summary_by_digest AS events_digest ON history.DIGEST=events_digest.DIGEST
+WHERE events_digest.LAST_SEEN >= DATE_SUB(NOW(), INTERVAL 10 SECOND);")
+# client.query("TRUNCATE TABLE performance_schema.events_statements_history_long")
 results.each do |row|
    puts row.to_json
 end
