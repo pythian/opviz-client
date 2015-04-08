@@ -213,8 +213,10 @@ class Mysql2Graphite < Sensu::Plugin::Metric::CLI::Graphite
         'Innodb_data_reads' =>                'fileReads',
         'Innodb_data_writes' =>               'fileWrites',
         'Innodb_data_fsyncs' =>               'fileFsyncs',
+        'Innodb_log_waits' =>                 'logBufferWaits',
         'Innodb_log_writes' =>                'logWrites',
-        'Innodb_rows_updated' =>              'rowsUpdated',
+        'Innodb_os_log_pending_writes' =>     'logPendingWrites',
+        'Innodb_os_log_written' =>            'logBytesWritten',
         'Innodb_rows_read' =>                 'rowsRead',
         'Innodb_rows_deleted' =>              'rowsDeleted',
         'Innodb_rows_inserted' =>             'rowsInserted'
