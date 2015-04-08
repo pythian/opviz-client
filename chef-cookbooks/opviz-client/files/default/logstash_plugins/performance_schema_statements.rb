@@ -51,13 +51,13 @@ end
 client = Mysql2::Client.new(:username => db_user, :password => db_pass, :socket => socket)
 results = client.query("SELECT
   history.thread_id, history.EVENT_NAME, history.DIGEST, history.DIGEST_TEXT,
+  DATE_FORMAT(DATE_SUB(NOW(),INTERVAL (SELECT VARIABLE_VALUE FROM information_schema.global_status WHERE variable_name='UPTIME')-TIMER_START*10e-13 second),'%Y-%m-%d %T') START_TIME, TIMER_WAIT,
   CURRENT_SCHEMA, OBJECT_SCHEMA, OBJECT_TYPE, OBJECT_NAME, MYSQL_ERRNO, RETURNED_SQLSTATE,
-  ERRORS, WARNINGS, ROWS_AFFECTED, LOCK_TIME, TIMER_WAIT, ROWS_SENT, ROWS_EXAMINED, CREATED_TMP_DISK_TABLES,
+  ERRORS, WARNINGS, ROWS_AFFECTED, ROWS_SENT, ROWS_EXAMINED, CREATED_TMP_DISK_TABLES,
   CREATED_TMP_TABLES, SELECT_FULL_JOIN, SELECT_FULL_RANGE_JOIN, SELECT_RANGE, SELECT_RANGE_CHECK,
   SELECT_SCAN, SORT_MERGE_PASSES, SORT_RANGE, SORT_ROWS, SORT_SCAN, NO_INDEX_USED, NO_GOOD_INDEX_USED
-FROM performance_schema.events_statements_history_long AS history
-INNER JOIN performance_schema.events_statements_summary_by_digest AS events_digest ON history.DIGEST=events_digest.DIGEST
-WHERE events_digest.LAST_SEEN >= DATE_SUB(NOW(), INTERVAL 10 SECOND);")
+FROM events_statements_history_long AS history
+WHERE DATE_FORMAT(DATE_SUB(NOW(),INTERVAL (SELECT VARIABLE_VALUE FROM information_schema.global_status WHERE variable_name='UPTIME')-TIMER_START*10e-13 second),'%Y-%m-%d %T') >= DATE_SUB(NOW(), INTERVAL 10 SECOND);")
 # client.query("TRUNCATE TABLE performance_schema.events_statements_history_long")
 results.each do |row|
    puts row.to_json
