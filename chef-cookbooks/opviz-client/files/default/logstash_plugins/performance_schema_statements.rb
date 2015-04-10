@@ -50,15 +50,24 @@ end
 
 client = Mysql2::Client.new(:username => db_user, :password => db_pass, :socket => socket)
 results = client.query("SELECT
-  history.thread_id, history.EVENT_NAME, history.DIGEST, history.DIGEST_TEXT,
-  DATE_FORMAT(DATE_SUB(NOW(),INTERVAL (SELECT VARIABLE_VALUE FROM information_schema.global_status WHERE variable_name='UPTIME')-TIMER_START*10e-13 second),'%Y-%m-%d %T') START_TIME, TIMER_WAIT,
-  CURRENT_SCHEMA, OBJECT_SCHEMA, OBJECT_TYPE, OBJECT_NAME, MYSQL_ERRNO, RETURNED_SQLSTATE,
+  STATEMENTS_THREAD_ID, STATEMENTS_EVENT_NAME, DIGEST, DIGEST_TEXT,
+  STATEMENTS_TIMER_WAIT, STATEMENTS_CURRENT_SCHEMA, STATEMENTS_OBJECT_SCHEMA, STATEMENTS_OBJECT_TYPE,
+  STATEMENTS_OBJECT_NAME, MYSQL_ERRNO, RETURNED_SQLSTATE,
   ERRORS, WARNINGS, ROWS_AFFECTED, ROWS_SENT, ROWS_EXAMINED, CREATED_TMP_DISK_TABLES,
   CREATED_TMP_TABLES, SELECT_FULL_JOIN, SELECT_FULL_RANGE_JOIN, SELECT_RANGE, SELECT_RANGE_CHECK,
   SELECT_SCAN, SORT_MERGE_PASSES, SORT_RANGE, SORT_ROWS, SORT_SCAN, NO_INDEX_USED, NO_GOOD_INDEX_USED
 FROM performance_schema.events_statements_history_long AS history
 WHERE DATE_FORMAT(DATE_SUB(NOW(),INTERVAL (SELECT VARIABLE_VALUE FROM information_schema.global_status WHERE variable_name='UPTIME')-TIMER_START*10e-13 second),'%Y-%m-%d %T') >= DATE_SUB(NOW(), INTERVAL 10 SECOND);")
-# client.query("TRUNCATE TABLE performance_schema.events_statements_history_long")
+results.each do |row|
+   puts row.to_json
+end
+
+client = Mysql2::Client.new(:username => db_user, :password => db_pass, :socket => socket)
+results = client.query("SELECT
+  WAITS_THREAD_ID, WAITS_EVENT_NAME, WAITS_TIMER_WAIT, SPINS, WAITS_OBJECT_SCHEMA, WAITS_OBJECT_NAME, INDEX_NAME,
+  WAITS_OBJECT_TYPE, WAITS_OPERATION, NUMBER_OF_BYTES
+FROM performance_schema.events_waits_history_long
+WHERE DATE_FORMAT(DATE_SUB(NOW(),INTERVAL (SELECT VARIABLE_VALUE FROM information_schema.global_status WHERE variable_name='UPTIME')-TIMER_START*10e-13 second),'%Y-%m-%d %T') >= DATE_SUB(NOW(), INTERVAL 10 SECOND);")
 results.each do |row|
    puts row.to_json
 end
