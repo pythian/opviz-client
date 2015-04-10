@@ -62,7 +62,6 @@ results.each do |row|
    puts row.to_json
 end
 
-client = Mysql2::Client.new(:username => db_user, :password => db_pass, :socket => socket)
 results = client.query("SELECT
   WAITS_THREAD_ID, WAITS_EVENT_NAME, WAITS_TIMER_WAIT, SPINS, WAITS_OBJECT_SCHEMA, WAITS_OBJECT_NAME, INDEX_NAME,
   WAITS_OBJECT_TYPE, WAITS_OPERATION, NUMBER_OF_BYTES
