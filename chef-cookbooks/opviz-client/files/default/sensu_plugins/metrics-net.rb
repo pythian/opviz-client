@@ -83,22 +83,6 @@ TCP_STATES = {
   '0B' => 'CLOSING'
 }
 
-# class NetstatTCPMetrics < Sensu::Plugin::Metric::CLI::Graphite
-#   option :scheme,
-#          description: 'Metric naming scheme, text to prepend to metric',
-#          short: '-s SCHEME',
-#          long: '--scheme SCHEME',
-#          default: "#{Socket.gethostname}.tcp"
-
-#   option :port,
-#          description: 'Port you wish to get metrics for',
-#          short: '-p PORT',
-#          long: '--port PORT',
-#          proc: proc(&:to_i)
-
-
-# end
-
 class LinuxPacketMetrics < Sensu::Plugin::Metric::CLI::Graphite
   option :scheme,
          description: 'Metric naming scheme, text to prepend to metric',
